@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jokearound</title>
+    <style>
+        :root {
+            --yellow: #ffd84d;
+            --dark: #242018;
+            --card: #ffffff;
+            --soft-yellow: #fff4bd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--dark);
+            font-family: Georgia, "Times New Roman", serif;
+            background: linear-gradient(135deg, #fffdf3 0%, var(--soft-yellow) 55%, var(--yellow) 100%);
+        }
+
+        header {
+            padding: 56px 24px 36px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            letter-spacing: 0.04em;
+        }
+
+        header p {
+            margin: 12px auto 0;
+            max-width: 560px;
+            font-size: 1.15rem;
+        }
+
+        main {
+            width: min(100% - 32px, 1050px);
+            margin: 0 auto 56px;
+        }
+
+        .games {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .game-card {
+            display: flex;
+            min-height: 190px;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+            background: var(--card);
+            border: 3px solid var(--dark);
+            border-radius: 16px;
+            box-shadow: 7px 7px 0 var(--dark);
+        }
+
+        .game-card h2 {
+            margin: 0 0 10px;
+            font-size: 1.55rem;
+        }
+
+        .game-card p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .play-button {
+            display: inline-block;
+            margin-top: 22px;
+            padding: 11px 16px;
+            color: var(--dark);
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            background: var(--yellow);
+            border: 2px solid var(--dark);
+            border-radius: 999px;
+        }
+
+        .play-button:hover,
+        .play-button:focus-visible {
+            background: var(--dark);
+            color: white;
+        }
+
+        footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>JokeAroundGames</h1>
+        <p>Choose a game and start playing or send to your friends for fun:).</p>
+    </header>
+
+    <main>
+        <section class="games" aria-label="Available games">
+            <article class="game-card">
+                <div>
+                    <h2>Quiz fun</h2>
+                    <p>Test your knowledge with our fun quiz!</p>
+                </div>
+                <a class="play-button" href="Together_one.html">Play now</a>
+            </article>
+        </section>
+    </main>
+
+    <footer>More games coming soon</footer>
+</body>
+</html>
+<body>
+    <p>If you like my games please don't hesitate to donate that will help me continue creating fun experiences for you! and keep up the domain name so you can always find this place</p>
+    </p>
+    <p>I will change the quiz game every other week.</p>
+    <a href="https://www.cash.app/grandmasboy2168">Donate soon pls</a>
+</body>

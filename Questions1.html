@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Question 1</title>
+</head>
+<body>
+  <h1>Question 1</h1>
+  <p>Which country holds the Guinness World Record for the most cars washed in 24 hours at a single multiple-location event?</p>
+  <input type="radio" id="optionA" name="answer" value="A"> A. The United States<br>
+  <input type="radio" id="optionB" name="answer" value="B"> B. Germany<br>
+  <input type="radio" id="optionC" name="answer" value="C"> C. Japan<br>
+  <input type="radio" id="optionD" name="answer" value="D"> D. Australia<br>
+  <button onclick="checkAnswer()">Submit</button>
+  <p id="scoreDisplay">Score: 0 correct | 0 incorrect</p>
+
+  <script>
+    if (localStorage.getItem("correctCount") === null) {
+      localStorage.setItem("correctCount", "0");
+      localStorage.setItem("incorrectCount", "0");
+    }
+
+    function updateScoreDisplay() {
+      const correctCount = parseInt(localStorage.getItem("correctCount")) || 0;
+      const incorrectCount = parseInt(localStorage.getItem("incorrectCount")) || 0;
+      document.getElementById("scoreDisplay").textContent =
+        "Score: " + correctCount + " correct | " + incorrectCount + " incorrect";
+    }
+
+    function normalizeAnswer(value) {
+      return value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    updateScoreDisplay();
+
+    function checkAnswer() {
+      if (document.getElementById("optionA").checked) {
+        let correctCount = parseInt(localStorage.getItem("correctCount")) || 0;
+        let newCorrectCount = correctCount + 1;
+        localStorage.setItem("correctCount", newCorrectCount.toString());
+        updateScoreDisplay();
+        alert("Correct! You answered the question correctly. Your score is now: " + newCorrectCount + " correct.");
+        window.location.href = "Question2.html";
+      } else {
+        let incorrectCount = parseInt(localStorage.getItem("incorrectCount")) || 0;
+        let newIncorrectCount = incorrectCount + 1;
+        localStorage.setItem("incorrectCount", newIncorrectCount.toString());
+        updateScoreDisplay();
+
+        const currentCorrect = parseInt(localStorage.getItem("correctCount")) || 0;
+        alert("Incorrect! The correct answer is: The United States. Your score is now: " + currentCorrect + " correct.");
+
+        if (newIncorrectCount >= 2) {
+          window.location.href = "GameOver.html";
+        } else {
+          window.location.href = "Question2.html";
+        }
+      }
+    }
+  </script>
+</body>
+</html>

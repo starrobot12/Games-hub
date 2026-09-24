@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>you won :)!</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #scare-container {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      z-index: 10;
+    }
+
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: #000;
+    }
+
+    #game-over-text {
+      position: relative;
+      z-index: 2;
+      padding: 20px;
+      display: none;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    #reset-box {
+      position: relative;
+      z-index: 3;
+      margin-top: 20px;
+      display: none;
+    }
+
+    input {
+      padding: 10px 14px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #888;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="scare-container">
+    <video id="scare-video" autoplay muted playsinline controls>
+      <source src="rick roll shorter.mp4" type="video/mp4">
+      Your browser does not support video playback.
+    </video>
+  </div>
+
+  <div id="game-over-text">
+    <h1>you won :)!</h1>
+    <p>yay you did it! TY for playing!</p>
+
+    <div id="reset-box">
+      <p>click <strong>End game</strong> to reset the game.</p>
+       <input type="submit"  id="resetInput" value="End game" />
+    </div>
+  </div>
+
+  <script>
+    const scareContainer = document.getElementById("scare-container");
+    const scareVideo = document.getElementById("scare-video");
+    const gameOverText = document.getElementById("game-over-text");
+    const resetBox = document.getElementById("reset-box");
+    const resetInput = document.getElementById("resetInput");
+
+    // Change this one line to your own MP3 file name.
+    const winSoundFile = "yay!!.mp3";
+    const endSound = new Audio(winSoundFile);
+    endSound.preload = "auto";
+    endSound.volume = 0.8;
+
+    function playFallbackTone() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      try {
+        const audioContext = new AudioCtx();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.value = 880;
+        gainNode.gain.value = 0.04;
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.35);
+        oscillator.onended = () => audioContext.close();
+      } catch (error) {
+        console.log("Fallback tone failed:", error);
+      }
+    }
+
+    function playWinSound() {
+      endSound.currentTime = 0;
+      endSound.play().catch(() => {
+        console.log("MP3 blocked or missing; using fallback tone instead.");
+        playFallbackTone();
+      });
+    }
+
+    let playbackCount = 0;
+
+    scareVideo.play().catch(() => {
+      console.log("Autoplay was blocked. The video can still be played manually.");
+    });
+
+    scareVideo.addEventListener("ended", function() {
+      playbackCount += 1;
+
+      if (playbackCount >= 1) {
+        scareVideo.pause();
+        scareVideo.currentTime = 0;
+        scareContainer.style.display = "none";
+        gameOverText.style.display = "block";
+        resetBox.style.display = "block";
+        playWinSound();
+        resetInput.focus();
+      } else {
+        scareVideo.currentTime = 0;
+        scareVideo.play();
+      }
+    });
+
+    resetInput.addEventListener("click", function(event) {
+      scareVideo.pause();
+      localStorage.removeItem("correctCount");
+      localStorage.removeItem("incorrectCount");
+      window.location.href = "Nuthen.html";
+    });
+
+  </script>
+</body>
+</html>

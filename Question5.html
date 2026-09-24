@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Question 5</title>
+</head>
+<body>
+  <h1>Question 5 last one:)</h1>
+  <p>Who founded the International Committee of the Red Cross in 1863 after witnessing the horrific aftermath of the Battle of Solferino?</p>
+  <input type="radio" id="optionA" name="answer" value="A"> A. Clara Barton<br>
+  <input type="radio" id="optionB" name="answer" value="B"> B. Henry Dunant<br>
+  <input type="radio" id="optionC" name="answer" value="C"> C. Florence Nightingale<br>
+  <input type="radio" id="optionD" name="answer" value="D"> D. Louis Pasteur<br>
+  <button onclick="checkAnswer()">Submit</button>
+  <p id="scoreDisplay">Score: 0 correct | 0 incorrect</p>
+
+  <script>
+    if (localStorage.getItem("correctCount") === null) {
+      localStorage.setItem("correctCount", "0");
+      localStorage.setItem("incorrectCount", "0");
+    }
+
+    function updateScoreDisplay() {
+      const correctCount = parseInt(localStorage.getItem("correctCount")) || 0;
+      const incorrectCount = parseInt(localStorage.getItem("incorrectCount")) || 0;
+      document.getElementById("scoreDisplay").textContent =
+        "Score: " + correctCount + " correct | " + incorrectCount + " incorrect";
+    }
+
+    function normalizeAnswer(value) {
+      return value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    updateScoreDisplay();
+
+    function checkAnswer() {
+      if (document.getElementById("optionB").checked) { 
+        let correctCount = parseInt(localStorage.getItem("correctCount")) || 0;
+        let newCorrectCount = correctCount + 1;
+        localStorage.setItem("correctCount", newCorrectCount.toString());
+        updateScoreDisplay();
+        alert("Correct! You answered the question correctly. Your score is now: " + newCorrectCount + " correct.");
+        window.location.href = "the_win.html";
+      } else {
+        let incorrectCount = parseInt(localStorage.getItem("incorrectCount")) || 0;
+        let newIncorrectCount = incorrectCount + 1;
+        localStorage.setItem("incorrectCount", newIncorrectCount.toString());
+        updateScoreDisplay();
+
+        const currentCorrect = parseInt(localStorage.getItem("correctCount")) || 0;
+        alert("Incorrect! The correct answer is: B, Henry Dunant. Your score is now: " + currentCorrect + " correct.");
+
+        if (newIncorrectCount >= 2) {
+          window.location.href = "GameOver.html";
+        } else {
+          window.location.href = "Question5.html";
+        }
+      }
+    }
+  </script>
+</body>
+</html>

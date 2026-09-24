@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>(TR) Games...</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #0b0b0b;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    #app {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 28px 22px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      font-size: 40px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-size: 18px;
+      margin: 12px 0;
+      padding: 10px 12px;
+      background: #2b2b2b;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    input[type="radio"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+
+    button, input[type="submit"] {
+      margin-top: 20px;
+      padding: 12px 22px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #ff5b5b;
+      color: white;
+      cursor: pointer;
+    }
+
+    #scoreDisplay {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #ffd2d2;
+    }
+
+    #scare-container {
+      position: fixed;
+      inset: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      z-index: 10;
+    }
+
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: #000;
+    }
+
+    #end-screen {
+      display: none;
+      position: relative;
+      z-index: 2;
+      padding: 20px;
+      margin-top: 60px;
+    }
+
+    #reset-box {
+      margin-top: 25px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="scare-container">
+    <video id="scare-video" autoplay muted playsinline controls>
+      <source src="jumpscaer for game.mp4" type="video/mp4">
+      Your browser does not support video playback.
+    </video>
+  </div>
+
+  <div id="app"></div>
+
+  <script>
+    const allQuestions = [
+      {
+        question: "Which country holds the Guinness World Record for the most cars washed in 24 hours at a single multiple-location event?",
+        options: ["The United States", "Germany", "Japan", "Australia"],
+        correct: "The United States"
+      },
+      {
+        question: "What year did Knott's Berry Farm open?",
+        options: ["1920", "1941", "1947", "1968"],
+        correct: "1968"
+      },
+      {
+        question: "What product was dispensed by the world's very first coin-operated vending machine, invented by Hero of Alexandria in the 1st century AD?",
+        options: ["Wine", "Holy water", "Oil", "Water"],
+        correct: "Holy water"
+      },
+      {
+        question: "What medium did the original 2004 GoPro camera use to record photos?",
+        options: ["Digital SD Card", "35mm Film", "VHS Tape", "Internal Flash Memory"],
+        correct: "35mm Film"
+      },
+      {
+        question: "Who founded the International Committee of the Red Cross in 1863 after witnessing the horrific aftermath of the Battle of Solferino?",
+        options: ["Clara Barton", "Henry Dunant", "Florence Nightingale", "Louis Pasteur"],
+        correct: "Henry Dunant"
+      },
+      {
+        question: "What is the capital of Japan?",
+        options: ["Seoul", "Tokyo", "Kyoto", "Osaka"],
+        correct: "Tokyo"
+      },
+      {
+        question: "Which planet is known as the Red Planet?",
+        options: ["Mars", "Venus", "Jupiter", "Mercury"],
+        correct: "Mars"
+      },
+      {
+        question: "Which language is primarily spoken in Brazil?",
+        options: ["Spanish", "French", "Portuguese", "English"],
+        correct: "Portuguese"
+      },
+      {
+        question: "Which ocean is the largest on Earth?",
+        options: ["Atlantic", "Indian", "Arctic", "Pacific"],
+        correct: "Pacific"
+      },
+      {
+        question: "Who painted the Mona Lisa?",
+        options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Claude Monet"],
+        correct: "Leonardo da Vinci"
+      }
+    ];
+
+    let questions = [];
+    const questionPoolKey = "remainingQuestions";
+
+    const app = document.getElementById("app");
+    const scareContainer = document.getElementById("scare-container");
+    const scareVideo = document.getElementById("scare-video");
+
+    let currentQuestion = 0;
+    let correctCount = 0;
+    let incorrectCount = 0;
+    let currentMode = "question";
+    let gameOverVideoPlayback = 0;
+
+    function ensureStorage() {
+      if (localStorage.getItem("correctCount") === null) {
+        localStorage.setItem("correctCount", "0");
+      }
+      if (localStorage.getItem("incorrectCount") === null) {
+        localStorage.setItem("incorrectCount", "0");
+      }
+
+      correctCount = parseInt(localStorage.getItem("correctCount")) || 0;
+      incorrectCount = parseInt(localStorage.getItem("incorrectCount")) || 0;
+    }
+
+    function updateScoreDisplay() {
+      const scoreText = document.getElementById("scoreDisplay");
+      if (scoreText) {
+        scoreText.textContent = "Score: " + correctCount + " correct | " + incorrectCount + " incorrect";
+      }
+    }
+
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getRemainingQuestions() {
+      const savedQuestions = JSON.parse(localStorage.getItem(questionPoolKey) || "null");
+
+      if (!Array.isArray(savedQuestions)) {
+        return [...allQuestions];
+      }
+
+      return savedQuestions
+        .map(questionText => allQuestions.find(q => q.question === questionText))
+        .filter(Boolean);
+    }
+
+    function startNewGame() {
+      const remainingQuestions = getRemainingQuestions();
+      const selectedQuestions = shuffleArray(remainingQuestions).slice(0, 5);
+
+      if (selectedQuestions.length < 5) {
+        const selectedTexts = new Set(selectedQuestions.map(q => q.question));
+        const refillQuestions = allQuestions.filter(q => !selectedTexts.has(q.question));
+        selectedQuestions.push(...shuffleArray(refillQuestions).slice(0, 5 - selectedQuestions.length));
+      }
+
+      questions = selectedQuestions;
+      const selectedTexts = new Set(questions.map(q => q.question));
+      const nextPool = allQuestions
+        .filter(q => !selectedTexts.has(q.question))
+        .map(q => q.question);
+      localStorage.setItem(questionPoolKey, JSON.stringify(nextPool));
+      currentQuestion = 0;
+      correctCount = 0;
+      incorrectCount = 0;
+      localStorage.removeItem("correctCount");
+      localStorage.removeItem("incorrectCount");
+    }
+    
+
+
+    function showStartScreen() {
+      currentMode = "start";
+      app.innerHTML = `
+        <div class="card">
+          <h1>Let's play a game!</h1>
+          <p>Welcome to the game!</p>
+          <p>Today you go under a series of questions. If you get them right, you win a special prize!(ps.you won't get much except a compliment)</p>
+          <p>But... if you lose two questions, you will get an End game present...</p>
+          <p>Anyway, let's get started :) Oh, and you have five questions to answer!</p>
+          <p>Click <strong>Let's go</strong> to start.</p>
+          <button id="startBtn">Let's go</button>
+        </div>
+      `;
+
+      document.getElementById("startBtn").addEventListener("click", function () {
+        startNewGame();
+        renderQuestionScreen();
+      });
+    }
+
+    function renderQuestionScreen() {
+      currentMode = "question";
+      const q = questions[currentQuestion];
+
+      app.innerHTML = `
+        <div class="card">
+          <h2>Question ${currentQuestion + 1}</h2>
+          <p>${q.question}</p>
+          ${q.options.map((option, index) => `
+            <label>
+              <input type="radio" name="answer" value="${option}" />
+              ${String.fromCharCode(65 + index)}. ${option}
+            </label>
+          `).join("")}
+          <button id="submitBtn">Submit</button>
+          <p id="scoreDisplay">Score: ${correctCount} correct | ${incorrectCount} incorrect</p>
+        </div>
+      `;
+
+      document.getElementById("submitBtn").addEventListener("click", checkAnswer);
+      updateScoreDisplay();
+    }
+
+    function renderWinScreen() {
+      currentMode = "win";
+      app.innerHTML = `
+        <div id="end-screen" style="display:block;">
+          <h1>you won :)!</h1>
+          <p>yay you did it! TY for playing!</p>
+          <div id="reset-box" style="display:block;">
+            <button id="hubButton" type="button">Back to game hub</button>
+          </div>
+        </div>
+      `;
+
+      setupVideoEndScreen("rick roll shorter.mp4", "yay!!.mp3", "win");
+      document.getElementById("hubButton").addEventListener("click", gobackTohub);
+    }
+
+    function renderGameOverScreen() {
+      currentMode = "gameover";
+      app.innerHTML = `
+        <div id="end-screen" style="display:block;">
+          <h1>GAME OVER</h1>
+          <p>You made too many wrong choices...</p>
+          <div id="reset-box" style="display:block;">
+            <button id="hubButton" type="button">Back to game hub</button>
+          </div>
+        </div>
+      `;
+
+      setupVideoEndScreen("jumpscaer for game.mp4", "Untitled Project.mp3", "gameover");
+      document.getElementById("hubButton").addEventListener("click", gobackTohub);
+    }
+
+    function setupVideoEndScreen(videoFile, soundFile, screenType) {
+      scareContainer.style.display = "flex";
+      scareVideo.src = videoFile;
+      scareVideo.muted = false;
+      scareVideo.volume = 1;
+      scareVideo.currentTime = 0;
+      scareVideo.play().catch(() => {
+        console.log("Autoplay was blocked. The video can still be played manually.");
+      });
+
+      const sound = new Audio(soundFile);
+      sound.preload = "auto";
+      sound.volume = 0.8;
+
+      function playEndSound() {
+        sound.currentTime = 0;
+        sound.play().catch(() => {
+          console.log("End sound blocked or missing.");
+        });
+      }
+
+      if (screenType === "win") {
+        scareVideo.addEventListener("ended", function () {
+          scareVideo.pause();
+          scareVideo.currentTime = 0;
+          scareContainer.style.display = "none";
+          playEndSound();
+          document.getElementById("reset-box").style.display = "block";
+        }, { once: true });
+      } else {
+        scareVideo.addEventListener("ended", function () {
+          gameOverVideoPlayback += 1;
+
+          if (gameOverVideoPlayback >= 3) {
+            scareVideo.pause();
+            scareVideo.currentTime = 0;
+            scareContainer.style.display = "none";
+            playEndSound();
+            document.getElementById("reset-box").style.display = "block";
+          } else {
+            scareVideo.currentTime = 0;
+            scareVideo.play().catch(() => {});
+          }
+        }, { once: false });
+      }
+    }
+
+    function checkAnswer() {
+      const selected = document.querySelector('input[name="answer"]:checked');
+      const q = questions[currentQuestion];
+
+      if (!selected) {
+        alert("Please choose an answer.");
+        return;
+      }
+
+      if (selected.value === q.correct) {
+        correctCount += 1;
+        localStorage.setItem("correctCount", String(correctCount));
+        alert("Correct! You answered the question correctly.");
+      } else {
+        incorrectCount += 1;
+        localStorage.setItem("incorrectCount", String(incorrectCount));
+        alert("Incorrect! The correct answer is: " + q.correct);
+      }
+
+      updateScoreDisplay();
+
+      if (incorrectCount >= 2) {
+        renderGameOverScreen();
+        return;
+      }
+
+      currentQuestion += 1;
+
+      if (currentQuestion < questions.length) {
+        renderQuestionScreen();
+      } else {
+        renderWinScreen();
+      }
+    }
+
+    function resetGame() {
+      localStorage.removeItem("correctCount");
+      localStorage.removeItem("incorrectCount");
+      currentQuestion = 0;
+      correctCount = 0;
+      incorrectCount = 0;
+      gameOverVideoPlayback = 0;
+      startNewGame();
+      ensureStorage();
+      showStartScreen();
+      scareContainer.style.display = "none";
+      scareVideo.pause();
+      scareVideo.currentTime = 0;
+    }
+
+    function gobackTohub() {
+      window.location.href = "game_home_pige.html";
+    }
+
+    ensureStorage();
+    showStartScreen();
+  </script>
+</body>
+</html>
