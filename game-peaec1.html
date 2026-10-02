@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Running Dinosaur</title>
+        <style>
+            * { box-sizing: border-box; }
+
+            body {
+                margin: 0;
+                background: #0b0b0b;
+                color: #fff;
+                font-family: Arial, sans-serif;
+                text-align: center;
+                min-height: 100vh;
+            }
+
+            #app {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 30px 20px;
+            }
+
+            .card {
+                background: #1a1a1a;
+                border-radius: 16px;
+                padding: 28px 22px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            }
+
+            h1 {
+                font-size: 40px;
+                margin-bottom: 20px;
+            }
+
+            p {
+                font-size: 18px;
+                line-height: 1.6;
+            }
+
+            button {
+                margin-top: 20px;
+                padding: 12px 22px;
+                font-size: 18px;
+                border: none;
+                border-radius: 10px;
+                background: #ff5b5b;
+                color: white;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <main id="app">
+            <section class="card">
+                <h1>Let's play running dinosaur!(IFN)</h1>
+                <p>Welcome to the game!</p>
+                <p>in this game you will have to run with out dying but thare is a catch to it in this game you have to try to becrefull becuse the
+                    dino will keep running faster and faster until you die and thare is a infint mode as well so try not to die and get a high score and if you want to play the game just click the button below one is regular and the other is infinite have fun:)</p>
+                </p>
+
+                <p>Click <strong>Let's go</strong> To start</p>
+                <button id="checkInput">Let's go</button>
+            </section>
+        </main>
+
+         <script>
+            checkInput.addEventListener("click", function(event) {
+                window.location.href = "dino-game.html";
+            });
+         </script>
+     </body>
+</html>

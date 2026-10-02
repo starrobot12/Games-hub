@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111714" />
+  <title>Running Dinosaur</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #111714;
+      --panel: #1b231e;
+      --line: #344139;
+      --text: #f2f0e7;
+      --muted: #a7b0a7;
+      --green: #c6f36b;
+      --red: #ff6a54;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      background: radial-gradient(ellipse at 50% -20%, #344034, var(--page) 62%);
+      font-family: Arial, sans-serif;
+    }
+
+    button, a { font: inherit; }
+
+    .page-shell {
+      width: min(1040px, 100% - 36px);
+      margin: 0 auto;
+      padding: 26px 0 38px;
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 31px;
+    }
+
+    .brand, .back-link {
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .brand { color: var(--text); font-weight: 700; }
+    .brand:hover, .back-link:hover { color: var(--green); }
+
+    .game-tag {
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .intro { margin-bottom: 22px; }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 42px);
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .game-panel {
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .hud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 0 4px 14px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #68746b;
+      border-radius: 50%;
+    }
+
+    .status[data-state="playing"] .status-dot { background: var(--green); }
+    .status[data-state="ended"] .status-dot { background: var(--red); }
+
+    .scores {
+      display: flex;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .scores strong {
+      margin-left: 6px;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .board-wrap {
+      position: relative;
+      overflow: hidden;
+      background: #dce7cd;
+      border: 1px solid #53624e;
+      border-radius: 9px;
+      aspect-ratio: 3 / 1;
+    }
+
+    canvas { display: block; width: 100%; height: 100%; }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 9px;
+      padding: 20px;
+      background: rgba(17, 23, 20, 0.76);
+      text-align: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .overlay[hidden] { display: none; }
+
+    .overlay h2 { margin: 0; font-size: clamp(24px, 4vw, 34px); }
+
+    .overlay p {
+      max-width: 360px;
+      margin: 0 0 5px;
+      color: #e1e5d9;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .primary-button, .secondary-button {
+      min-height: 43px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 140ms ease, transform 140ms ease;
+    }
+
+    .primary-button { color: #18200e; background: var(--green); }
+    .primary-button:hover { background: #d7ff91; }
+    .secondary-button { color: var(--text); background: #303a33; }
+    .secondary-button:hover { background: #3c493f; }
+    button:active { transform: translateY(1px); }
+
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 2px 0;
+    }
+
+    .action-hint { color: var(--muted); font-size: 12px; }
+    .action-buttons { display: flex; gap: 9px; }
+    .secondary-button { min-height: 39px; padding: 0 14px; font-size: 13px; }
+
+    .jump-button {
+      min-width: 112px;
+      color: #18200e;
+      background: var(--green);
+      font-size: 14px;
+    }
+
+    .jump-button:hover { background: #d7ff91; }
+
+    @media (max-width: 600px) {
+      .page-shell { width: min(100% - 24px, 520px); padding-top: 19px; }
+      .topline { margin-bottom: 25px; }
+      .game-panel { padding: 10px; }
+      .board-wrap { aspect-ratio: 1.8 / 1; }
+      .hud { align-items: flex-start; }
+      .scores { gap: 12px; font-size: 10px; }
+      .actions { align-items: stretch; flex-direction: column; }
+      .action-hint { text-align: center; }
+      .action-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+      .action-buttons button { min-height: 45px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <nav class="topline" aria-label="Game navigation">
+      <a class="brand" href="game_home_pige.html">← Game hub</a>
+      <span class="game-tag">Arcade / Run</span>
+    </nav>
+
+    <header class="intro">
+      <p class="eyebrow">Running dinosaur(IFN)</p>
+      <h1>Keep moving.</h1>
+      <p class="subtitle">Jump the cacti. See how far you can go.</p>
+    </header>
+
+    <section class="game-panel" aria-label="Dinosaur runner game">
+      <div class="hud">
+        <div class="status" id="gameStatus" data-state="ready" aria-live="polite">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="statusText">Ready</span>
+        </div>
+        <div class="scores" aria-label="Scores">
+          <span>Distance<strong id="score">00000</strong></span>
+          <span>Best<strong id="bestScore">00000</strong></span>
+        </div>
+      </div>
+
+      <div class="board-wrap">
+        <canvas id="gameBoard" width="960" height="320" aria-label="Dinosaur runner board. Jump over cacti to keep running."></canvas>
+        <div class="overlay" id="gameOverlay">
+          <h2 id="overlayTitle">Ready to run?</h2>
+          <p id="overlayCopy">Jump over the cacti and keep your run going.</p>
+          <button class="primary-button" id="overlayButton" type="button">Start running</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <span class="action-hint">Press Space or ↑ to jump</span>
+        <div class="action-buttons">
+          <button class="secondary-button" id="pauseButton" type="button" disabled>Pause</button>
+          <button class="primary-button jump-button" id="jumpButton" type="button">Jump ↑</button>
+        </div>
+      </div>
+    </section>
+
+    <a class="back-link" href="game_home_pige.html">← Back to game hub</a>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("gameBoard");
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    const groundY = 258;
+    const dinoX = 112;
+    const dinoHeight = 48;
+    const dinoWidth = 45;
+    const gravity = 1750;
+    const jumpPower = 650;
+    const elements = {
+      overlay: document.getElementById("gameOverlay"),
+      overlayTitle: document.getElementById("overlayTitle"),
+      overlayCopy: document.getElementById("overlayCopy"),
+      overlayButton: document.getElementById("overlayButton"),
+      status: document.getElementById("gameStatus"),
+      statusText: document.getElementById("statusText"),
+      score: document.getElementById("score"),
+      bestScore: document.getElementById("bestScore"),
+      pauseButton: document.getElementById("pauseButton")
+    };
+
+    let state = "ready";
+    let dinoBottom = groundY;
+    let velocityY = 0;
+    let obstacles = [];
+    let clouds = [
+      { x: 175, y: 74, scale: 1 },
+      { x: 445, y: 112, scale: 0.75 },
+      { x: 760, y: 64, scale: 0.9 }
+    ];
+    let distance = 0;
+    let score = 0;
+    let bestScore = 0;
+    let speed = 345;
+    let spawnTimer = 1.2;
+    let groundOffset = 0;
+    let lastFrame = 0;
+    let animationFrame = null;
+    let runTime = 0;
+
+    try {
+      bestScore = Number(localStorage.getItem("dinoBestScore")) || 0;
+    } catch {}
+
+    function formatScore(value) {
+      return String(value).padStart(5, "0");
+    }
+
+    function updateHud() {
+      elements.score.textContent = formatScore(score);
+      elements.bestScore.textContent = formatScore(bestScore);
+    }
+
+    function setState(nextState, label) {
+      state = nextState;
+      elements.status.dataset.state = nextState;
+      elements.statusText.textContent = label;
+    }
+
+    function showOverlay(title, copy, buttonLabel) {
+      elements.overlayTitle.textContent = title;
+      elements.overlayCopy.textContent = copy;
+      elements.overlayButton.textContent = buttonLabel;
+      elements.overlay.hidden = false;
+    }
+
+    function drawCloud(cloud) {
+      ctx.save();
+      ctx.translate(cloud.x, cloud.y);
+      ctx.scale(cloud.scale, cloud.scale);
+      ctx.fillStyle = "rgba(255, 255, 245, 0.72)";
+      ctx.fillRect(0, 12, 72, 12);
+      ctx.fillRect(13, 3, 20, 16);
+      ctx.fillRect(30, 0, 24, 19);
+      ctx.fillRect(49, 8, 14, 12);
+      ctx.restore();
+    }
+
+    function drawDinosaur() {
+      const x = dinoX;
+      const top = dinoBottom - dinoHeight;
+      const legFrame = state === "playing" && dinoBottom === groundY ? Math.floor(runTime * 13) % 2 : 0;
+      ctx.fillStyle = "#416345";
+      ctx.fillRect(x + 8, top + 18, 27, 22);
+      ctx.fillRect(x + 24, top + 3, 20, 21);
+      ctx.fillRect(x + 31, top + 21, 11, 11);
+      ctx.fillRect(x + 2, top + 19, 9, 7);
+      ctx.fillRect(x + 16, top + 37, 8, 7);
+      ctx.fillRect(x + 33, top + 37, 8, 7);
+      ctx.fillStyle = "#263a2c";
+      ctx.fillRect(x + 37, top + 8, 3, 3);
+      ctx.fillRect(x + 35, top + 44, 8, 4);
+      ctx.fillRect(x + 14 + legFrame * 10, top + 43, 7, 5);
+      ctx.fillRect(x + 28 - legFrame * 10, top + 43, 7, 5);
+    }
+
+    function drawCactus(obstacle) {
+      const x = obstacle.x;
+      const top = groundY - obstacle.height;
+      ctx.fillStyle = "#456b4d";
+      ctx.fillRect(x + 8, top, 13, obstacle.height);
+      ctx.fillRect(x, top + 15, 9, 7);
+      ctx.fillRect(x, top + 8, 6, 14);
+      ctx.fillRect(x + 20, top + 24, 9, 7);
+      ctx.fillRect(x + 23, top + 17, 6, 14);
+      ctx.fillStyle = "#7e9e68";
+      ctx.fillRect(x + 11, top + 4, 3, obstacle.height - 9);
+      ctx.fillRect(x + 2, top + 17, 3, 5);
+      ctx.fillRect(x + 25, top + 26, 2, 5);
+    }
+
+    function drawScene() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#dce7cd";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "rgba(239, 190, 93, 0.56)";
+      ctx.beginPath();
+      ctx.arc(786, 76, 28, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#c8d8bb";
+      ctx.beginPath();
+      ctx.moveTo(0, 226);
+      ctx.lineTo(116, 170);
+      ctx.lineTo(245, 226);
+      ctx.lineTo(380, 185);
+      ctx.lineTo(526, 226);
+      ctx.lineTo(675, 165);
+      ctx.lineTo(832, 226);
+      ctx.lineTo(960, 182);
+      ctx.lineTo(960, groundY);
+      ctx.lineTo(0, groundY);
+      ctx.closePath();
+      ctx.fill();
+
+      clouds.forEach(drawCloud);
+
+      ctx.fillStyle = "#a8794e";
+      ctx.fillRect(0, groundY, width, height - groundY);
+      ctx.fillStyle = "#526b4b";
+      ctx.fillRect(0, groundY, width, 4);
+      ctx.fillStyle = "rgba(59, 47, 36, 0.32)";
+      for (let x = -20 - groundOffset; x < width; x += 58) {
+        ctx.fillRect(x, groundY + 21, 15, 3);
+        ctx.fillRect(x + 29, groundY + 42, 7, 3);
+      }
+
+      obstacles.forEach(drawCactus);
+      drawDinosaur();
+    }
+
+    function resetRun() {
+      dinoBottom = groundY;
+      velocityY = 0;
+      obstacles = [];
+      distance = 0;
+      score = 0;
+      speed = 345;
+      spawnTimer = 1.05;
+      groundOffset = 0;
+      runTime = 0;
+      updateHud();
+      drawScene();
+    }
+
+    function startGame() {
+      if (state === "paused") {
+        elements.overlay.hidden = true;
+        elements.pauseButton.textContent = "Pause";
+        setState("playing", "Running");
+        lastFrame = performance.now();
+        animationFrame = requestAnimationFrame(gameLoop);
+        return;
+      }
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      resetRun();
+      elements.overlay.hidden = true;
+      elements.pauseButton.disabled = false;
+      elements.pauseButton.textContent = "Pause";
+      setState("playing", "Running");
+      lastFrame = performance.now();
+      animationFrame = requestAnimationFrame(gameLoop);
+    }
+
+    function pauseGame() {
+      if (state !== "playing") return;
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+      elements.pauseButton.textContent = "Resume";
+      setState("paused", "Paused");
+      showOverlay("Take a breather.", "The run is paused. Ready when you are.", "Resume");
+    }
+
+    function jump() {
+      if (state === "ready" || state === "ended") {
+        startGame();
+      }
+      if (state === "playing" && dinoBottom >= groundY - 0.5) {
+        velocityY = -jumpPower;
+      }
+    }
+
+    function endGame() {
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+      bestScore = Math.max(bestScore, score);
+      try {
+        localStorage.setItem("dinoBestScore", String(bestScore));
+      } catch {}
+      updateHud();
+      elements.pauseButton.disabled = true;
+      elements.pauseButton.textContent = "Pause";
+      setState("ended", "Run over");
+      showOverlay("Run complete.", `You travelled ${score} metres. Take another run?`, "Run again");
+    }
+
+    function overlaps(first, second) {
+      return first.x < second.x + second.width &&
+        first.x + first.width > second.x &&
+        first.y < second.y + second.height &&
+        first.y + first.height > second.y;
+    }
+
+    function gameLoop(now) {
+      if (state !== "playing") return;
+      const delta = Math.min((now - lastFrame) / 1000, 0.04);
+      lastFrame = now;
+      runTime += delta;
+      distance += speed * delta;
+      score = Math.floor(distance / 10);
+      speed = Math.min(630, 345 + score * 1.2);
+      groundOffset = (groundOffset + speed * delta) % 58;
+
+      dinoBottom += velocityY * delta;
+      velocityY += gravity * delta;
+      if (dinoBottom > groundY) {
+        dinoBottom = groundY;
+        velocityY = 0;
+      }
+
+      spawnTimer -= delta;
+      if (spawnTimer <= 0) {
+        const cactusHeight = 30 + Math.random() * 24;
+        obstacles.push({ x: width + 20, height: cactusHeight, width: 30 });
+        spawnTimer = Math.max(0.82, 1.45 + Math.random() * 0.48 - score / 1800);
+      }
+
+      obstacles.forEach(obstacle => { obstacle.x -= speed * delta; });
+      obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > -5);
+
+      const dinoBox = { x: dinoX + 9, y: dinoBottom - dinoHeight + 8, width: dinoWidth - 15, height: dinoHeight - 9 };
+      const hitObstacle = obstacles.some(obstacle => overlaps(dinoBox, {
+        x: obstacle.x + 3,
+        y: groundY - obstacle.height + 4,
+        width: obstacle.width - 6,
+        height: obstacle.height - 4
+      }));
+
+      clouds.forEach(cloud => {
+        cloud.x -= speed * delta * 0.12;
+        if (cloud.x < -90) cloud.x = width + 20;
+      });
+
+      updateHud();
+      drawScene();
+
+      if (hitObstacle) {
+        endGame();
+        return;
+      }
+      animationFrame = requestAnimationFrame(gameLoop);
+    }
+
+    elements.overlayButton.addEventListener("click", startGame);
+    document.getElementById("jumpButton").addEventListener("click", jump);
+    elements.pauseButton.addEventListener("click", () => {
+      if (state === "playing") pauseGame();
+      else if (state === "paused") startGame();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.code === "Space" || event.code === "ArrowUp" || event.code === "KeyW") {
+        event.preventDefault();
+        jump();
+      } else if (event.code === "Escape" && state === "playing") {
+        pauseGame();
+      } else if (event.code === "Escape" && state === "paused") {
+        startGame();
+      }
+    });
+
+    canvas.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      jump();
+    });
+
+    elements.bestScore.textContent = formatScore(bestScore);
+    resetRun();
+  </script>
+</body>
+</html>
