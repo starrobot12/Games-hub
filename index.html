@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jokearound</title>
+    <title>Games that play with you</title>
     <style>
         :root {
             --yellow: #ffd84d;
@@ -17,6 +17,8 @@
         }
 
         body {
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
             margin: 0;
             color: var(--dark);
@@ -42,6 +44,7 @@
         }
 
         main {
+            flex: 1;
             width: min(100% - 32px, 1050px);
             margin: 0 auto 56px;
         }
@@ -94,15 +97,47 @@
         }
 
         footer {
-            padding: 20px;
-            text-align: center;
-            font-size: 0.95rem;
+            padding: 70px 37px;
+            color: #ffffff;
+            background: #111111;
+        }
+
+        .footer-content {
+            display: flex;
+            width: min(100%, 1050px);
+            margin: 0 auto;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        footer p {
+            max-width: 620px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        footer a {
+            color: var(--yellow);
+        }
+
+        @media (max-width: 600px) {
+            .footer-content {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>JokeAroundGames</h1>
+        <h1>Games that play with you</h1>
         <p>Choose a game and start playing or send to your friends for fun:).</p>
     </header>
 
@@ -115,15 +150,30 @@
                 </div>
                 <a class="play-button" href="Together_one.html">Play now</a>
             </article>
+            <article class="game-card">
+                <div>
+                    <h2>(IFN)dion</h2> 
+                    <p>A game where you have to try not to die</p>
+                </div>
+                <a class="play-button" href="game-peaec1.html">play now</a>
+            </article>
+            <article class="game-card">
+                <div>
+                    <h2>More games coming soon</h2>
+                    <p>Check back later for new games and updates!</p>
+                </div>
+                <a class="play-button" href="#">Stay tuned</a>
         </section>
     </main>
 
-    <footer>More games coming soon</footer>
+    <footer>
+        <div class="footer-content">
+            <p>More games coming soon. If you enjoy the games, you can support their development and help keep this site online.</p>
+            <nav class="footer-links" aria-label="Footer links">
+                <a href="https://www.cash.app/grandmasboy2168">Support the games</a>
+                <a href="terms.html">Terms of use</a>
+            </nav>
+        </div>
+    </footer>
 </body>
 </html>
-<body>
-    <p>If you like my games please don't hesitate to donate that will help me continue creating fun experiences for you! and keep up the domain name so you can always find this place</p>
-    </p>
-    <p>I will change the quiz game every other week.</p>
-    <a href="https://www.cash.app/grandmasboy2168">Donate soon pls</a>
-</body>
