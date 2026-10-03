@@ -1,433 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>(TR) Games...</title>
-  <style>
-    * { box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="Z11FRTQWjsFJhLruHe9tXuc82KSLsX1wWOymVO2jVqc" />
+    <title>Games that play with you</title>
+    <style>
+        :root {
+            --yellow: #ffd84d;
+            --dark: #242018;
+            --card: #ffffff;
+            --soft-yellow: #fff4bd;
+        }
 
-    body {
-      margin: 0;
-      background: #0b0b0b;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      min-height: 100vh;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    #app {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 30px 20px;
-    }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--dark);
+            font-family: Georgia, "Times New Roman", serif;
+            background: linear-gradient(135deg, #fffdf3 0%, var(--soft-yellow) 55%, var(--yellow) 100%);
+        }
 
-    .card {
-      background: #1a1a1a;
-      border-radius: 16px;
-      padding: 28px 22px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    }
+        .intro-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: #fbfaf5;
+            transition: background-color 850ms ease;
+        }
 
-    h1 {
-      font-size: 40px;
-      margin-bottom: 20px;
-    }
+        .intro-screen video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: top 850ms ease, right 850ms ease, width 850ms ease,
+                height 850ms ease, opacity 250ms ease 650ms;
+        }
 
-    h2 {
-      font-size: 32px;
-      margin-bottom: 16px;
-    }
+        .intro-screen.is-ending {
+            background: transparent;
+            pointer-events: none;
+        }
 
-    p {
-      font-size: 18px;
-      line-height: 1.6;
-    }
+        .intro-screen.is-ending video {
+            inset: 14px 16px auto auto;
+            width: min(180px, 32vw);
+            height: min(101px, 18vw);
+            opacity: 0;
+        }
 
-    label {
-      display: block;
-      text-align: left;
-      font-size: 18px;
-      margin: 12px 0;
-      padding: 10px 12px;
-      background: #2b2b2b;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+        .skip-intro {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1;
+            padding: 10px 14px;
+            color: white;
+            font: inherit;
+            background: rgb(36 32 24 / 80%);
+            border: 1px solid rgb(255 255 255 / 65%);
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-    input[type="radio"] {
-      margin-right: 10px;
-      transform: scale(1.2);
-    }
+        .intro-screen.is-ending .skip-intro {
+            display: none;
+        }
 
-    button, input[type="submit"] {
-      margin-top: 20px;
-      padding: 12px 22px;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      background: #ff5b5b;
-      color: white;
-      cursor: pointer;
-    }
+        .corner-logo {
+            position: fixed;
+            top: 14px;
+            right: 16px;
+            z-index: 1;
+            display: block;
+            width: min(180px, 32vw);
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            opacity: 0;
+            visibility: hidden;
+        }
 
-    #scoreDisplay {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #ffd2d2;
-    }
+        body.intro-complete .corner-logo {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 300ms ease 650ms;
+        }
 
-    #scare-container {
-      position: fixed;
-      inset: 0;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      background: #000;
-      z-index: 10;
-    }
+        header {
+            padding: 132px 24px 36px;
+            text-align: center;
+        }
 
-    video {
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      background: #000;
-    }
+        h1 {
+            margin: 0;
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            letter-spacing: 0.04em;
+        }
 
-    #end-screen {
-      display: none;
-      position: relative;
-      z-index: 2;
-      padding: 20px;
-      margin-top: 60px;
-    }
+        header p {
+            margin: 12px auto 0;
+            max-width: 560px;
+            font-size: 1.15rem;
+        }
 
-    #reset-box {
-      margin-top: 25px;
-      display: none;
-    }
-  </style>
+        main {
+            flex: 1;
+            width: min(100% - 32px, 1050px);
+            margin: 0 auto 56px;
+        }
+
+        .games {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .game-card {
+            display: flex;
+            min-height: 190px;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+            background: var(--card);
+            border: 3px solid var(--dark);
+            border-radius: 16px;
+            box-shadow: 7px 7px 0 var(--dark);
+        }
+
+        .game-card h2 {
+            margin: 0 0 10px;
+            font-size: 1.55rem;
+        }
+
+        .game-card p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .play-button {
+            display: inline-block;
+            margin-top: 22px;
+            padding: 11px 16px;
+            color: var(--dark);
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            background: var(--yellow);
+            border: 2px solid var(--dark);
+            border-radius: 999px;
+        }
+
+        .play-button:hover,
+        .play-button:focus-visible {
+            background: var(--dark);
+            color: white;
+        }
+
+        footer {
+            padding: 70px 37px;
+            color: #ffffff;
+            background: #111111;
+        }
+
+        .footer-content {
+            display: flex;
+            width: min(100%, 1050px);
+            margin: 0 auto;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        footer p {
+            max-width: 620px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        footer a {
+            color: var(--yellow);
+        }
+
+        @media (max-width: 600px) {
+            .footer-content {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
 </head>
+    <meta property="og:title" content="GameNoodles - Indie Game Studio" />
+<meta property="og:description" content="Check out our latest indie game!" />
+<meta property="og:image" content="https://gamenoodles.com/your-image-name.jpg" />
+<meta property="og:url" content="https://gamenoodles.com" />
+<meta name="twitter:card" content="summary_large_image" />
 <body>
-  <div id="scare-container">
-    <video id="scare-video" autoplay muted playsinline controls>
-      <source src="jumpscaer for game.mp4" type="video/mp4">
-      Your browser does not support video playback.
-    </video>
-  </div>
+    <div class="intro-screen" id="intro-screen">
+        <video id="intro-video" autoplay muted playsinline>
+            <source src="gemini_generated_video_9CFCB2AD.mp4" type="video/mp4">
+        </video>
+        <button class="skip-intro" id="skip-intro" type="button">Skip intro</button>
+    </div>
+    <img class="corner-logo" src="71c0b6a9-ea62-48c5-b5a5-f0901cd4bb8a.jpg" alt="Brain Noodles Games">
 
-  <div id="app"></div>
+    <header>
+        <h1>Games that play with you</h1>
+        <p>Choose a game and start playing or send to your friends for fun:).</p>
+    </header>
 
-  <script>
-    const allQuestions = [
-      {
-        question: "Which country holds the Guinness World Record for the most cars washed in 24 hours at a single multiple-location event?",
-        options: ["The United States", "Germany", "Japan", "Australia"],
-        correct: "The United States"
-      },
-      {
-        question: "What year did Knott's Berry Farm open?",
-        options: ["1920", "1941", "1947", "1968"],
-        correct: "1968"
-      },
-      {
-        question: "What product was dispensed by the world's very first coin-operated vending machine, invented by Hero of Alexandria in the 1st century AD?",
-        options: ["Wine", "Holy water", "Oil", "Water"],
-        correct: "Holy water"
-      },
-      {
-        question: "What medium did the original 2004 GoPro camera use to record photos?",
-        options: ["Digital SD Card", "35mm Film", "VHS Tape", "Internal Flash Memory"],
-        correct: "35mm Film"
-      },
-      {
-        question: "Who founded the International Committee of the Red Cross in 1863 after witnessing the horrific aftermath of the Battle of Solferino?",
-        options: ["Clara Barton", "Henry Dunant", "Florence Nightingale", "Louis Pasteur"],
-        correct: "Henry Dunant"
-      },
-      {
-        question: "What is the capital of Japan?",
-        options: ["Seoul", "Tokyo", "Kyoto", "Osaka"],
-        correct: "Tokyo"
-      },
-      {
-        question: "Which planet is known as the Red Planet?",
-        options: ["Mars", "Venus", "Jupiter", "Mercury"],
-        correct: "Mars"
-      },
-      {
-        question: "Which language is primarily spoken in Brazil?",
-        options: ["Spanish", "French", "Portuguese", "English"],
-        correct: "Portuguese"
-      },
-      {
-        question: "Which ocean is the largest on Earth?",
-        options: ["Atlantic", "Indian", "Arctic", "Pacific"],
-        correct: "Pacific"
-      },
-      {
-        question: "Who painted the Mona Lisa?",
-        options: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Claude Monet"],
-        correct: "Leonardo da Vinci"
-      }
-    ];
+    <main>
+        <section class="games" aria-label="Available games">
+            <article class="game-card">
+                <div>
+                    <h2>Quiz fun</h2>
+                    <p>Test your knowledge with our fun quiz!</p>
+                </div>
+                <a class="play-button" href="Together_one.html">Play now</a>
+            </article>
+            <article class="game-card">
+                <div>
+                    <h2>unknown</h2>
+                    <p>unknown game</p>
+                </div>
+                <a class="play-button" href="#">not ready yet</a>
+            </article>
+            <article class="game-card">
+                <div>
+                    <h2>More games coming soon</h2>
+                    <p>Check back later for new games and updates!</p>
+                </div>
+                <a class="play-button" href="#">Stay tuned</a>
+            </article>
+        </section>
+    </main>
 
-    let questions = [];
-    const questionPoolKey = "remainingQuestions";
-
-    const app = document.getElementById("app");
-    const scareContainer = document.getElementById("scare-container");
-    const scareVideo = document.getElementById("scare-video");
-
-    let currentQuestion = 0;
-    let correctCount = 0;
-    let incorrectCount = 0;
-    let currentMode = "question";
-    let gameOverVideoPlayback = 0;
-
-    function ensureStorage() {
-      if (localStorage.getItem("correctCount") === null) {
-        localStorage.setItem("correctCount", "0");
-      }
-      if (localStorage.getItem("incorrectCount") === null) {
-        localStorage.setItem("incorrectCount", "0");
-      }
-
-      correctCount = parseInt(localStorage.getItem("correctCount")) || 0;
-      incorrectCount = parseInt(localStorage.getItem("incorrectCount")) || 0;
-    }
-
-    function updateScoreDisplay() {
-      const scoreText = document.getElementById("scoreDisplay");
-      if (scoreText) {
-        scoreText.textContent = "Score: " + correctCount + " correct | " + incorrectCount + " incorrect";
-      }
-    }
-
-    function shuffleArray(array) {
-      const copy = [...array];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
-
-    function getRemainingQuestions() {
-      const savedQuestions = JSON.parse(localStorage.getItem(questionPoolKey) || "null");
-
-      if (!Array.isArray(savedQuestions)) {
-        return [...allQuestions];
-      }
-
-      return savedQuestions
-        .map(questionText => allQuestions.find(q => q.question === questionText))
-        .filter(Boolean);
-    }
-
-    function startNewGame() {
-      const remainingQuestions = getRemainingQuestions();
-      const selectedQuestions = shuffleArray(remainingQuestions).slice(0, 5);
-
-      if (selectedQuestions.length < 5) {
-        const selectedTexts = new Set(selectedQuestions.map(q => q.question));
-        const refillQuestions = allQuestions.filter(q => !selectedTexts.has(q.question));
-        selectedQuestions.push(...shuffleArray(refillQuestions).slice(0, 5 - selectedQuestions.length));
-      }
-
-      questions = selectedQuestions;
-      const selectedTexts = new Set(questions.map(q => q.question));
-      const nextPool = allQuestions
-        .filter(q => !selectedTexts.has(q.question))
-        .map(q => q.question);
-      localStorage.setItem(questionPoolKey, JSON.stringify(nextPool));
-      currentQuestion = 0;
-      correctCount = 0;
-      incorrectCount = 0;
-      localStorage.removeItem("correctCount");
-      localStorage.removeItem("incorrectCount");
-    }
-    
-
-
-    function showStartScreen() {
-      currentMode = "start";
-      app.innerHTML = `
-        <div class="card">
-          <h1>Let's play a game!</h1>
-          <p>Welcome to the game!</p>
-          <p>Today you go under a series of questions. If you get them right, you win a special prize!(ps.you won't get much except a compliment) and also the crator will change questions every other weak</p>
-          <p>But... if you lose two questions, you will get an End game present...</p>
-          <p>Anyway, let's get started :) Oh, and you have five questions to answer!</p>
-          <p>Click <strong>Let's go</strong> to start.</p>
-          <button id="startBtn">Let's go</button>
+    <footer>
+        <div class="footer-content">
+            <p>More games coming soon. If you enjoy the games, you can support their development and help keep this site online.</p>
+            <nav class="footer-links" aria-label="Footer links">
+                <a href="https://www.cash.app/grandmasboy2168">Support the games</a>
+                <a href="terms.html">Terms of use</a>
+            </nav>
         </div>
-      `;
+    </footer>
 
-      document.getElementById("startBtn").addEventListener("click", function () {
-        startNewGame();
-        renderQuestionScreen();
-      });
-    }
+    <script>
+        const introScreen = document.getElementById('intro-screen');
+        const introVideo = document.getElementById('intro-video');
+        const skipIntro = document.getElementById('skip-intro');
+        let introFinished = false;
 
-    function renderQuestionScreen() {
-      currentMode = "question";
-      const q = questions[currentQuestion];
+        function finishIntro() {
+            if (introFinished) return;
+            introFinished = true;
 
-      app.innerHTML = `
-        <div class="card">
-          <h2>Question ${currentQuestion + 1}</h2>
-          <p>${q.question}</p>
-          ${q.options.map((option, index) => `
-            <label>
-              <input type="radio" name="answer" value="${option}" />
-              ${String.fromCharCode(65 + index)}. ${option}
-            </label>
-          `).join("")}
-          <button id="submitBtn">Submit</button>
-          <p id="scoreDisplay">Score: ${correctCount} correct | ${incorrectCount} incorrect</p>
-        </div>
-      `;
+            introScreen.classList.add('is-ending');
+            document.body.classList.add('intro-complete');
 
-      document.getElementById("submitBtn").addEventListener("click", checkAnswer);
-      updateScoreDisplay();
-    }
+            window.setTimeout(() => {
+                introScreen.remove();
+            }, 900);
+        }
 
-    function renderWinScreen() {
-      currentMode = "win";
-      app.innerHTML = `
-        <div id="end-screen" style="display:block;">
-          <h1>you won :)!</h1>
-          <p>yay you did it! TY for playing!</p>
-          <div id="reset-box" style="display:block;">
-            <button id="hubButton" type="button">Back to game hub</button>
-          </div>
-        </div>
-      `;
-
-      setupVideoEndScreen("rick roll shorter.mp4", "yay!!.mp3", "win");
-      document.getElementById("hubButton").addEventListener("click", gobackTohub);
-    }
-
-    function renderGameOverScreen() {
-      currentMode = "gameover";
-      app.innerHTML = `
-        <div id="end-screen" style="display:block;">
-          <h1>GAME OVER</h1>
-          <p>You made too many wrong choices...</p>
-          <div id="reset-box" style="display:block;">
-            <button id="hubButton" type="button">Back to game hub</button>
-          </div>
-        </div>
-      `;
-
-      setupVideoEndScreen("jumpscaer for game.mp4", "Untitled Project.mp3", "gameover");
-      document.getElementById("hubButton").addEventListener("click", gobackTohub);
-    }
-
-    function setupVideoEndScreen(videoFile, soundFile, screenType) {
-      scareContainer.style.display = "flex";
-      scareVideo.src = videoFile;
-      scareVideo.muted = false;
-      scareVideo.volume = 1;
-      scareVideo.currentTime = 0;
-      scareVideo.play().catch(() => {
-        console.log("Autoplay was blocked. The video can still be played manually.");
-      });
-
-      const sound = new Audio(soundFile);
-      sound.preload = "auto";
-      sound.volume = 0.8;
-
-      function playEndSound() {
-        sound.currentTime = 0;
-        sound.play().catch(() => {
-          console.log("End sound blocked or missing.");
+        skipIntro.addEventListener('click', finishIntro);
+        introVideo.addEventListener('ended', finishIntro);
+        introVideo.addEventListener('error', () => {
+            console.warn('Intro video failed to load');
+            finishIntro();
         });
-      }
 
-      if (screenType === "win") {
-        scareVideo.addEventListener("ended", function () {
-          scareVideo.pause();
-          scareVideo.currentTime = 0;
-          scareContainer.style.display = "none";
-          playEndSound();
-          document.getElementById("reset-box").style.display = "block";
-        }, { once: true });
-      } else {
-        scareVideo.addEventListener("ended", function () {
-          gameOverVideoPlayback += 1;
+        const playIntro = async () => {
+            try {
+                const playPromise = introVideo.play();
+                if (playPromise !== undefined) {
+                    await playPromise;
+                }
+            } catch (error) {
+                console.warn('Autoplay was blocked or video failed:', error.message);
+                window.setTimeout(finishIntro, 3000);
+            }
+        };
 
-          if (gameOverVideoPlayback >= 3) {
-            scareVideo.pause();
-            scareVideo.currentTime = 0;
-            scareContainer.style.display = "none";
-            playEndSound();
-            document.getElementById("reset-box").style.display = "block";
-          } else {
-            scareVideo.currentTime = 0;
-            scareVideo.play().catch(() => {});
-          }
-        }, { once: false });
-      }
-    }
+        playIntro();
 
-    function checkAnswer() {
-      const selected = document.querySelector('input[name="answer"]:checked');
-      const q = questions[currentQuestion];
-
-      if (!selected) {
-        alert("Please choose an answer.");
-        return;
-      }
-
-      if (selected.value === q.correct) {
-        correctCount += 1;
-        localStorage.setItem("correctCount", String(correctCount));
-        alert("Correct! You answered the question correctly.");
-      } else {
-        incorrectCount += 1;
-        localStorage.setItem("incorrectCount", String(incorrectCount));
-        alert("Incorrect! The correct answer is: " + q.correct);
-      }
-
-      updateScoreDisplay();
-
-      if (incorrectCount >= 2) {
-        renderGameOverScreen();
-        return;
-      }
-
-      currentQuestion += 1;
-
-      if (currentQuestion < questions.length) {
-        renderQuestionScreen();
-      } else {
-        renderWinScreen();
-      }
-    }
-
-    function resetGame() {
-      localStorage.removeItem("correctCount");
-      localStorage.removeItem("incorrectCount");
-      currentQuestion = 0;
-      correctCount = 0;
-      incorrectCount = 0;
-      gameOverVideoPlayback = 0;
-      startNewGame();
-      ensureStorage();
-      showStartScreen();
-      scareContainer.style.display = "none";
-      scareVideo.pause();
-      scareVideo.currentTime = 0;
-    }
-
-    function gobackTohub() {
-      window.location.href = "index.html";
-    }
-
-    ensureStorage();
-    showStartScreen();
-  </script>
+        window.setTimeout(() => {
+            if (!introFinished) {
+                console.warn('Intro timeout - forcing completion');
+                finishIntro();
+            }
+        }, 10000);
+    </script>
 </body>
 </html>
