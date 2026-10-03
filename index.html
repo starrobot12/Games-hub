@@ -241,7 +241,7 @@
             </article>
             <article class="game-card">
                 <div>
-                    <h2>unknown</h2>    
+                    <h2>unknown</h2>
                     <p>unknown game</p>
                 </div>
                 <a class="play-button" href="#">not ready yet</a>
@@ -265,6 +265,7 @@
             </nav>
         </div>
     </footer>
+
     <script>
         const introScreen = document.getElementById('intro-screen');
         const introVideo = document.getElementById('intro-video');
@@ -274,15 +275,42 @@
         function finishIntro() {
             if (introFinished) return;
             introFinished = true;
+
             introScreen.classList.add('is-ending');
             document.body.classList.add('intro-complete');
-            window.setTimeout(() => introScreen.remove(), 1000);
+
+            window.setTimeout(() => {
+                introScreen.remove();
+            }, 900);
         }
 
         skipIntro.addEventListener('click', finishIntro);
         introVideo.addEventListener('ended', finishIntro);
-        introVideo.addEventListener('error', finishIntro);
-        introVideo.play().catch(() => finishIntro());
+        introVideo.addEventListener('error', () => {
+            console.warn('Intro video failed to load');
+            finishIntro();
+        });
+
+        const playIntro = async () => {
+            try {
+                const playPromise = introVideo.play();
+                if (playPromise !== undefined) {
+                    await playPromise;
+                }
+            } catch (error) {
+                console.warn('Autoplay was blocked or video failed:', error.message);
+                window.setTimeout(finishIntro, 3000);
+            }
+        };
+
+        playIntro();
+
+        window.setTimeout(() => {
+            if (!introFinished) {
+                console.warn('Intro timeout - forcing completion');
+                finishIntro();
+            }
+        }, 10000);
     </script>
 </body>
 </html>
