@@ -173,7 +173,7 @@
     ];
 
     let questions = [];
-    const questionPoolKey = "remainingQuestions";
+    const questionPoolKey = "allQuestions";
 
     const app = document.getElementById("app");
     const scareContainer = document.getElementById("scare-container");
@@ -214,7 +214,7 @@
     }
 
     function getRemainingQuestions() {
-      const savedQuestions = JSON.parse(localStorage.getItem(questionPoolKey) || "null");
+      const savedQuestions = JSON.parse(localStorage.getItem(allQuestions) || "null");
 
       if (!Array.isArray(savedQuestions)) {
         return [...allQuestions];
